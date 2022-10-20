@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 [System.Serializable]
 public class Boundary {
@@ -7,6 +8,9 @@ public class Boundary {
 }
 
 public class PlayerController : MonoBehaviour {
+
+	private PlayerEventManager _eventManager;
+
 	public float speed;
 	public float tilt;
 	public Boundary boundary;
@@ -23,10 +27,22 @@ public class PlayerController : MonoBehaviour {
     private const string HORIZONTAL = "Horizontal";
     private const string VERTICAL = "Vertical";
 
-    public void Start () {
+    public void Awake ()
+	{
         body = GetComponent<Rigidbody>();
+		_eventManager = new PlayerEventManager();
+		GetComponent<PlayerInteractionHandler>().Init(_eventManager);
+	}
+
+    private void OnEnable()
+    {
+		_eventManager.BonusScore += OnBonusScore;
     }
 
+    private void OnDisable()
+    {
+		_eventManager.BonusScore -= OnBonusScore;
+	}
 
     public void Update () {
 		if (Input.GetButton(FIRE_BTN) && Time.time > nextFire) {
@@ -51,4 +67,13 @@ public class PlayerController : MonoBehaviour {
 		
 		body.rotation = Quaternion.Euler (0.0f, 0.0f, body.velocity.x * -tilt);
 	}
+
+	#region Event Handlers
+
+	private void OnBonusScore(int score)
+	{
+		EventManager.Instance.ScoreEarned?.Invoke(score);
+	}
+
+	#endregion //Event Handlers
 }

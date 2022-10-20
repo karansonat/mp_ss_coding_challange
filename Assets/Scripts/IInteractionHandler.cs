@@ -2,7 +2,7 @@ public interface IInteractionHandler
 {
     #region Public Methods
 
-    void Handle();
+    void Handle(Interaction interaction);
 
     #endregion //Public Methods
 }
