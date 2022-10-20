@@ -18,6 +18,7 @@ public class EventManager
     #region Events
 
     public Action GameOver;
+    public Action<int> ScoreEarned;
 
     #endregion //Events
 }

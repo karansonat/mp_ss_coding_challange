@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class DestroyByContact : MonoBehaviour {
 	public GameObject explosion;
@@ -30,8 +29,8 @@ public class DestroyByContact : MonoBehaviour {
 			Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
 			gameController.GameOver();
 		}
-		
-		gameController.AddScore(scoreValue);
+
+		EventManager.Instance.ScoreEarned.Invoke(scoreValue);
 		Destroy(other.gameObject);
 		Destroy(gameObject);
 	}
