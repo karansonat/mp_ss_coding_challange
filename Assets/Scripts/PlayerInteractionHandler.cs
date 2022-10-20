@@ -32,8 +32,10 @@ public class PlayerInteractionHandler : MonoBehaviour, IInteractionHandler
             case InteractionType.SpeedBoost:
                 break;
             case InteractionType.UnlockItem:
+                _eventManager.ItemUnlocked?.Invoke(interaction.Object as UnlockableItemData);
                 break;
             case InteractionType.TimedUpgrade:
+                _eventManager.TimedUpgrade.Invoke(interaction.Object as TimedUpgradeData, interaction.Value);
                 break;
         }
     }
@@ -44,4 +46,6 @@ public class PlayerInteractionHandler : MonoBehaviour, IInteractionHandler
 public class PlayerEventManager
 {
     public Action<int> BonusScore;
+    public Action<TimedUpgradeData, double> TimedUpgrade;
+    public Action<UnlockableItemData> ItemUnlocked;
 }

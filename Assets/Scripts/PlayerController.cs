@@ -10,20 +10,15 @@ public class Boundary {
 public class PlayerController : MonoBehaviour {
 
 	private PlayerEventManager _eventManager;
+	private float _currentSpeed;
+	private Coroutine _speedMultiplierRoutine;
+	private Coroutine _scoreMultiplierRoutine;
 
 	public float speed;
 	public float tilt;
-	public Boundary boundary;
-
-	public GameObject shot;
-	public Transform shotSpawn;
-	public float fireRate;
-	 
-	private float nextFire;
-	
+	public Boundary boundary;	
     private Rigidbody body;
 
-    private const string FIRE_BTN = "Fire1";
     private const string HORIZONTAL = "Horizontal";
     private const string VERTICAL = "Vertical";
 
@@ -32,32 +27,29 @@ public class PlayerController : MonoBehaviour {
         body = GetComponent<Rigidbody>();
 		_eventManager = new PlayerEventManager();
 		GetComponent<PlayerInteractionHandler>().Init(_eventManager);
+		_currentSpeed = speed;
 	}
 
     private void OnEnable()
     {
 		_eventManager.BonusScore += OnBonusScore;
+		_eventManager.TimedUpgrade += OnTimedUpgrade;
+		_eventManager.ItemUnlocked += OnItemUnlocked;
     }
 
     private void OnDisable()
     {
 		_eventManager.BonusScore -= OnBonusScore;
+		_eventManager.TimedUpgrade -= OnTimedUpgrade;
+		_eventManager.ItemUnlocked -= OnItemUnlocked;
 	}
 
-    public void Update () {
-		if (Input.GetButton(FIRE_BTN) && Time.time > nextFire) {
-			nextFire = Time.time + fireRate;
-			Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
-			GetComponent<AudioSource>().Play ();
-		}
-	}
-
-	public void FixedUpdate () {
+    public void FixedUpdate () {
 		float moveHorizontal = Input.GetAxis (HORIZONTAL);
 		float moveVertical = Input.GetAxis (VERTICAL);
 
 		Vector3 movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
-		body.velocity = movement * speed;
+		body.velocity = movement * _currentSpeed;
 		
 		body.position = new Vector3(
 			Mathf.Clamp (body.position.x, boundary.xMin, boundary.xMax), 
@@ -68,11 +60,59 @@ public class PlayerController : MonoBehaviour {
 		body.rotation = Quaternion.Euler (0.0f, 0.0f, body.velocity.x * -tilt);
 	}
 
+	private IEnumerator TimedUpgradeSpeed(TimedUpgradeData data, double duration)
+    {
+		_currentSpeed = speed * (float)data.Multiplier;
+
+		yield return new WaitForSeconds((float)duration);
+
+		_currentSpeed = speed;
+    }
+
+	private IEnumerator TimedUpgradeScore(TimedUpgradeData data, double duration)
+	{
+		EventManager.Instance.ScoreMultiplierUpdated.Invoke(data.Multiplier);
+
+		yield return new WaitForSeconds((float)duration);
+
+		EventManager.Instance.ScoreMultiplierUpdated.Invoke(1f);
+	}
+
+	private void StartNewUpgradeRoutine(ref Coroutine currentRoutine, IEnumerator upgradeFunc)
+    {
+		if (currentRoutine != null)
+			StopCoroutine(currentRoutine);
+
+		currentRoutine = StartCoroutine(upgradeFunc);
+	}
+
 	#region Event Handlers
 
 	private void OnBonusScore(int score)
 	{
 		EventManager.Instance.ScoreEarned?.Invoke(score);
+	}
+
+	private void OnTimedUpgrade(TimedUpgradeData data, double duration)
+	{
+        switch (data.Type)
+        {
+            case TimedUpgradeType.Speed:
+				StartNewUpgradeRoutine(ref _speedMultiplierRoutine, TimedUpgradeSpeed(data, duration));
+				break;
+            case TimedUpgradeType.FireRate:
+                break;
+            case TimedUpgradeType.Health:
+                break;
+			case TimedUpgradeType.Score:
+				StartNewUpgradeRoutine(ref _scoreMultiplierRoutine, TimedUpgradeScore(data, duration));
+				break;
+		}
+	}
+
+	private void OnItemUnlocked(UnlockableItemData itemData)
+	{
+		EventManager.Instance.ItemUnlocked?.Invoke(itemData);
 	}
 
 	#endregion //Event Handlers

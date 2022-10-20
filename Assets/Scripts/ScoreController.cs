@@ -1,6 +1,5 @@
 using UnityEngine.UI;
 using UnityEngine;
-using System;
 
 public class ScoreController : MonoBehaviour
 {
@@ -9,6 +8,7 @@ public class ScoreController : MonoBehaviour
     [SerializeField] private Text _scoreText;
 
     private int _score;
+    private double _multiplier;
 
     #endregion //Fields
 
@@ -16,6 +16,7 @@ public class ScoreController : MonoBehaviour
 
     private void Awake()
     {
+        _multiplier = 1;
         _score = 0;
         UpdateScore();
     }
@@ -23,11 +24,13 @@ public class ScoreController : MonoBehaviour
     private void OnEnable()
     {
         EventManager.Instance.ScoreEarned += OnScoreEarned;
+        EventManager.Instance.ScoreMultiplierUpdated += OnScoreMultiplierUpdated;
     }
 
     private void OnDisable()
     {
         EventManager.Instance.ScoreEarned -= OnScoreEarned;
+        EventManager.Instance.ScoreMultiplierUpdated -= OnScoreMultiplierUpdated;
     }
 
     #endregion //Unity Methods
@@ -36,7 +39,7 @@ public class ScoreController : MonoBehaviour
 
     private void AddScore(int earnedScore)
     {
-        _score += earnedScore;
+        _score += Mathf.FloorToInt(earnedScore * (float)_multiplier);
         UpdateScore();
     }
 
@@ -50,6 +53,11 @@ public class ScoreController : MonoBehaviour
     private void OnScoreEarned(int earnedScore)
     {
         AddScore(earnedScore);
+    }
+
+    private void OnScoreMultiplierUpdated(double multiplier)
+    {
+        _multiplier = multiplier;
     }
 
     #endregion //Event Handlers

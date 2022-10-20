@@ -19,6 +19,8 @@ public class EventManager
 
     public Action GameOver;
     public Action<int> ScoreEarned;
+    public Action<double> ScoreMultiplierUpdated;
+    public Action<UnlockableItemData> ItemUnlocked;
 
     #endregion //Events
 }

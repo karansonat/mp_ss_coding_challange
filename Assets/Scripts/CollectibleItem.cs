@@ -25,7 +25,6 @@ public class CollectibleItem : MonoBehaviour
 
         if (_data.CanBeCollectedBy.Any(tag => other.CompareTag(tag)))
         {
-            Debug.Log($"TriggerEnter: {other.name} ItemId: {GetInstanceID()}");
             other.GetComponent<IInteractionHandler>()?.Handle(_data.OnCollected);
             Collect();
         }
@@ -37,7 +36,6 @@ public class CollectibleItem : MonoBehaviour
 
     public void Collect()
     {
-        Debug.Log($"Item ({gameObject.GetInstanceID()}) Collected! Result: {_data.OnCollected.Type}");
         _collected = true;
         Destroy(gameObject);
     }
