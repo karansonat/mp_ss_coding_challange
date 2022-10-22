@@ -15,7 +15,7 @@ public class GameController : Singleton<GameController>
         restart = false;
         restartText.text = "";
         gameOverText.text = "";
-        GetComponent<WaveController>().Init();
+        GetComponent<LevelController>().Init();
     }
 
     public void Update()

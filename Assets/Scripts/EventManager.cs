@@ -21,6 +21,8 @@ public class EventManager
     public Action<int> ScoreEarned;
     public Action<double> ScoreMultiplierUpdated;
     public Action<UnlockableItemData> ItemUnlocked;
+    public Action WaveStateCompleted;
+    public Action WaveElementDestoryed;
 
     #endregion //Events
 }

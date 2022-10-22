@@ -1,26 +1,29 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class DefaultWaveState : IState
+public class WaveState : IState
 {
     #region Fields
 
-    private readonly string PATH_FACTORY = "Factories/DefaultWaveFactory";
     private WaveFactory _waveFactory;
     private float _startWait;
     private float _waveWait;
     private float _spawnTimer;
     private bool _readyToSpawn;
     private bool _enabled;
-    private IState _nextState;
+    private int _spawnedWaveCount;
+    private int _maxWaveCount;
+    private int _destroyedWaveElementCount;
 
     #endregion //Fields
 
     #region Constructor
 
-    public DefaultWaveState()
+    public WaveState(WaveFactory waveFactory, int waveCount)
     {
         _enabled = false;
-        _nextState = this;
+        _waveFactory = waveFactory;
+        _maxWaveCount = waveCount;
     }
 
     #endregion //Constructor
@@ -29,23 +32,26 @@ public class DefaultWaveState : IState
 
     void IState.Begin()
     {
+        _destroyedWaveElementCount = 0;
+        _spawnedWaveCount = 0;
         _readyToSpawn = false;
         _spawnTimer = _startWait;
-        _waveFactory = Resources.Load<WaveFactory>(PATH_FACTORY);
         _startWait = _waveFactory.StartWait;
         _waveWait = _waveFactory.WaveWait;
         _enabled = true;
+        EventManager.Instance.WaveElementDestoryed += OnWaveElementDestoryed;
     }
 
     void IState.End()
     {
         _enabled = false;
+        EventManager.Instance.WaveElementDestoryed -= OnWaveElementDestoryed;
     }
 
-    IState IState.Update()
+    void IState.Update()
     {
         if (!_enabled)
-            return _nextState;
+            return;
 
         if (_readyToSpawn)
         {
@@ -62,7 +68,7 @@ public class DefaultWaveState : IState
                 _readyToSpawn = true;
         }
 
-        return _nextState;
+        return;
     }
 
     #endregion //Interface Implementation
@@ -71,8 +77,23 @@ public class DefaultWaveState : IState
 
     private void OnWaveSpawned()
     {
-        _enabled = true;
+        _spawnedWaveCount++;
+
+        if (_spawnedWaveCount != _maxWaveCount)
+            _enabled = true;
     }
+
+    #region Event Handlers
+
+    private void OnWaveElementDestoryed()
+    {
+        _destroyedWaveElementCount++;
+
+        if (_destroyedWaveElementCount == _waveFactory.WaveSize)
+            EventManager.Instance.WaveStateCompleted.Invoke();
+    }
+
+    #endregion //Event Handlers
 
     #endregion //Private Methods
 }

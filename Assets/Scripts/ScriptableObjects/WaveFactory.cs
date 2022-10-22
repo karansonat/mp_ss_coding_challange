@@ -17,6 +17,7 @@ public class WaveFactory : ScriptableObject
 
     public float StartWait => _startWait;
     public float WaveWait => _waveWait;
+    public int WaveSize => _waveSize;
 
     #endregion //Fields
 
@@ -24,7 +25,7 @@ public class WaveFactory : ScriptableObject
 
     public void SpawnWave(Action onComplete = null)
     {
-        UnityMainThreadDispatcher.Instance().Enqueue(SpawnWaveRoutine(onComplete));
+        SceneContext.Instance.GameController.StartCoroutine(SpawnWaveRoutine(onComplete));
     }
 
     #endregion //Factory Methods
