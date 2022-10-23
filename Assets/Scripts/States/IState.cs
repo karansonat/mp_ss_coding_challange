@@ -3,7 +3,7 @@ public interface IState
     #region Public Methods
 
     void Begin();
-    void Update();
+    IState Update();
     void End();
 
     #endregion //Public Methods

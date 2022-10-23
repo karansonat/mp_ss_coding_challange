@@ -23,6 +23,7 @@ public class EventManager
     public Action<UnlockableItemData> ItemUnlocked;
     public Action WaveStateCompleted;
     public Action WaveElementDestoryed;
+    public Action BossKilled;
 
     #endregion //Events
 }

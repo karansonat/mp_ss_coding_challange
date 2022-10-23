@@ -17,7 +17,13 @@ public class StateController
 
     public void Update()
     {
-        _currentState?.Update();
+        if (_currentState == null)
+            return;
+
+        var state = _currentState.Update();
+
+        if (state != _currentState)
+            SwitchState(state);
     }
 
     public void SwitchState(IState newState)

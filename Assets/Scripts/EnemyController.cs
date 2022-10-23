@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EliteEnemyController : MonoBehaviour, IDamageable
+public class EnemyController : MonoBehaviour, IDamageable
 {
     #region Fields
 
@@ -8,7 +8,7 @@ public class EliteEnemyController : MonoBehaviour, IDamageable
     [SerializeField] private GameObject _damageParticle;
     [SerializeField] private GameObject _explosion;
     [SerializeField] private int _scoreValue;
-    private float _currentHealth;
+    protected float _currentHealth;
 
     #endregion //Fields
 
@@ -35,13 +35,13 @@ public class EliteEnemyController : MonoBehaviour, IDamageable
 
     #region Private Methods
 
-    private void OnDamage(float damage)
+    protected virtual void OnDamage(float damage)
     {
         Instantiate(_damageParticle, transform.position, transform.rotation);
         _currentHealth -= damage;
     }
 
-    private void OnKilled()
+    protected virtual void OnKilled()
     {
         Instantiate(_explosion, transform.position, transform.rotation);
         EventManager.Instance.ScoreEarned.Invoke(_scoreValue);

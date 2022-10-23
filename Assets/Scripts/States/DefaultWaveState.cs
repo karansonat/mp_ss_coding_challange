@@ -48,10 +48,10 @@ public class WaveState : IState
         EventManager.Instance.WaveElementDestoryed -= OnWaveElementDestoryed;
     }
 
-    void IState.Update()
+    IState IState.Update()
     {
         if (!_enabled)
-            return;
+            return this;
 
         if (_readyToSpawn)
         {
@@ -68,7 +68,7 @@ public class WaveState : IState
                 _readyToSpawn = true;
         }
 
-        return;
+        return this;
     }
 
     #endregion //Interface Implementation

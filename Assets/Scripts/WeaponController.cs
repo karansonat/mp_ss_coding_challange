@@ -9,7 +9,7 @@ public class WeaponController : MonoBehaviour {
 
     private float nextFireTime;
 
-	public void Start () {
+	public void OnEnable () {
         nextFireTime = Time.time + delay;
 	}
 

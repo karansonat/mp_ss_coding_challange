@@ -6,6 +6,8 @@ public class LevelController : MonoBehaviour
 {
     #region Fields
 
+    [SerializeField] private GameObject _bossPrefab;
+    [SerializeField] private Vector3 _bossSpawnPosition;
     [SerializeField] private WaveFactory _defaultWaveFactory;
     [SerializeField] private WaveFactory _eliteWaveFactory;
     [SerializeField] private int _eliteRoundsBeforeBoss;
@@ -51,9 +53,9 @@ public class LevelController : MonoBehaviour
     public void Init()
     {
         _stateController = new StateController();
-        _stateController.Init(new WaveState(_defaultWaveFactory, _defaultRoundRepeat));
+        //_stateController.Init(new WaveState(_defaultWaveFactory, _defaultRoundRepeat));
+        _stateController.Init(new BossState(SpawnBoss()));
         _lastWaveType = WaveType.Default;
-        Debug.Log("Default started");
     }
 
     #endregion //Public Methods
@@ -68,7 +70,7 @@ public class LevelController : MonoBehaviour
 
             if (_completedEliteRound == _eliteRoundsBeforeBoss)
             {
-                _stateController.SwitchState(new BossState());
+                _stateController.SwitchState(new BossState(SpawnBoss()));
                 return;
             }
         }
@@ -78,12 +80,10 @@ public class LevelController : MonoBehaviour
             case WaveType.Default:
                 _stateController.SwitchState(new WaveState(_eliteWaveFactory, _defaultRoundRepeat));
                 _lastWaveType = WaveType.Elite;
-                Debug.Log("Elite started");
                 break;
             case WaveType.Elite:
                 _stateController.SwitchState(new WaveState(_defaultWaveFactory, _eliteRoundRepeat));
                 _lastWaveType = WaveType.Default;
-                Debug.Log("Default started");
                 break;
         }
     }
@@ -92,6 +92,11 @@ public class LevelController : MonoBehaviour
     {
         if (_stateController != null)
             _stateController.Kill();
+    }
+
+    private BossController SpawnBoss()
+    {
+        return Instantiate(_bossPrefab, _bossSpawnPosition, Quaternion.identity).GetComponent<BossController>();
     }
 
     #endregion //Private Methods
