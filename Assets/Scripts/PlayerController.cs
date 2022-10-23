@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour {
 	public Boundary boundary;	
     private Rigidbody body;
 	private Vector3 _initialPosition;
+	private Collider _hitBox;
 	private bool _enabled;
 
     private const string HORIZONTAL = "Horizontal";
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour {
 		_eventManager = new PlayerEventManager();
 		GetComponent<PlayerInteractionHandler>().Init(_eventManager);
 		_currentSpeed = speed;
+		_hitBox = GetComponent<Collider>();
 	}
 
     private void OnEnable()
@@ -136,6 +138,7 @@ public class PlayerController : MonoBehaviour {
 	private void OnLevelComplete()
 	{
 		_enabled = false;
+		_hitBox.enabled = false;
 		body.velocity = Vector3.zero;
 		var seq = DOTween.Sequence();
 		seq.Append(transform.DOMove(_initialPosition, 2f));
