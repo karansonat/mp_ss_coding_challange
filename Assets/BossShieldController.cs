@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using Lean.Pool;
+using System.Collections;
 
 public class BossShieldController : MonoBehaviour
 {
@@ -9,9 +11,16 @@ public class BossShieldController : MonoBehaviour
     [SerializeField] private GameObject _shield;
     [SerializeField] private GameObject _flashParticlePrefab;
 
+    private WaitForSeconds _flashDespawnDelay;
+
     #endregion //Fields
 
     #region Unity Methods
+
+    private void Awake()
+    {
+        _flashDespawnDelay = new WaitForSeconds(2f);
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -20,11 +29,6 @@ public class BossShieldController : MonoBehaviour
             SpawnFlashParticleAt(other.transform.position);
             Destroy(other.gameObject);
         }
-    }
-
-    private void SpawnFlashParticleAt(Vector3 contactPoint)
-    {
-        Instantiate(_flashParticlePrefab, contactPoint, Quaternion.identity);
     }
 
     #endregion //Unity Methods
@@ -38,4 +42,22 @@ public class BossShieldController : MonoBehaviour
     }
 
     #endregion //Public Methods
+
+    #region Private Methods
+
+    private void SpawnFlashParticleAt(Vector3 contactPoint)
+    {
+        SceneContext.Instance.GameController.StartCoroutine(SpawnFlashParticleRoutine(contactPoint));
+    }
+
+    private IEnumerator SpawnFlashParticleRoutine(Vector3 contactPoint)
+    {
+        var spawned = LeanPool.Spawn(_flashParticlePrefab, contactPoint, Quaternion.identity);
+
+        yield return _flashDespawnDelay;
+
+        LeanPool.Despawn(spawned);
+    }
+
+    #endregion //Private Methods
 }
