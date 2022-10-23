@@ -50,7 +50,7 @@ public class BossState : IState
     {
         _isBossKilled = true;
         _stateController.Kill();
-        Debug.Log("Level Complete");
+        EventManager.Instance.LevelComplete.Invoke();
     }
 
     #endregion //Private Methods

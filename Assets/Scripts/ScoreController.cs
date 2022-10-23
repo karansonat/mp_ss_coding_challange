@@ -5,8 +5,6 @@ public class ScoreController : MonoBehaviour
 {
     #region Fields
 
-    [SerializeField] private Text _scoreText;
-
     private int _score;
     private double _multiplier;
 
@@ -45,7 +43,7 @@ public class ScoreController : MonoBehaviour
 
     private void UpdateScore()
     {
-        _scoreText.text = $"Score: {_score}";
+        EventManager.Instance.ScoreUpdated.Invoke(_score, _score == 0);
     }
 
     #region Event Handlers

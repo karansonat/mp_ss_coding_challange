@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using DG.Tweening;
 
 [System.Serializable]
 public class Boundary {
@@ -18,12 +19,15 @@ public class PlayerController : MonoBehaviour {
 	public float tilt;
 	public Boundary boundary;	
     private Rigidbody body;
+	private Vector3 _initialPosition;
+	private bool _enabled;
 
     private const string HORIZONTAL = "Horizontal";
     private const string VERTICAL = "Vertical";
 
     public void Awake ()
 	{
+		_initialPosition = transform.position;
         body = GetComponent<Rigidbody>();
 		_eventManager = new PlayerEventManager();
 		GetComponent<PlayerInteractionHandler>().Init(_eventManager);
@@ -35,16 +39,25 @@ public class PlayerController : MonoBehaviour {
 		_eventManager.BonusScore += OnBonusScore;
 		_eventManager.TimedUpgrade += OnTimedUpgrade;
 		_eventManager.ItemUnlocked += OnItemUnlocked;
-    }
+		EventManager.Instance.GameStarted += OnGameStarted;
+		EventManager.Instance.LevelComplete += OnLevelComplete;
+		
+	}
 
-    private void OnDisable()
+	private void OnDisable()
     {
 		_eventManager.BonusScore -= OnBonusScore;
 		_eventManager.TimedUpgrade -= OnTimedUpgrade;
 		_eventManager.ItemUnlocked -= OnItemUnlocked;
+		EventManager.Instance.GameStarted -= OnGameStarted;
+		EventManager.Instance.LevelComplete -= OnLevelComplete;
 	}
 
-    public void FixedUpdate () {
+    public void FixedUpdate ()
+	{
+		if (!_enabled)
+			return;
+
 		float moveHorizontal = Input.GetAxis (HORIZONTAL);
 		float moveVertical = Input.GetAxis (VERTICAL);
 
@@ -113,6 +126,20 @@ public class PlayerController : MonoBehaviour {
 	private void OnItemUnlocked(UnlockableItemData itemData)
 	{
 		EventManager.Instance.ItemUnlocked?.Invoke(itemData);
+	}
+
+	private void OnGameStarted()
+	{
+		_enabled = true;
+	}
+
+	private void OnLevelComplete()
+	{
+		_enabled = false;
+		body.velocity = Vector3.zero;
+		var seq = DOTween.Sequence();
+		seq.Append(transform.DOMove(_initialPosition, 2f));
+		seq.Join(transform.DORotate(Quaternion.identity.eulerAngles, 2f));
 	}
 
 	#endregion //Event Handlers

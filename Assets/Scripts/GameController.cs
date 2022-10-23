@@ -1,39 +1,61 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+﻿using UnityEngine.SceneManagement;
+using UnityEngine;
+using System;
 
 public class GameController : Singleton<GameController>
 {
-    public Text restartText;
-    public Text gameOverText;
 
-    private bool gameOver;
-    private bool restart;
+    #region Unity Methods
 
-    public void Start() {
-        gameOver = false;
-        restart = false;
-        restartText.text = "";
-        gameOverText.text = "";
-        GetComponent<LevelController>().Init();
-    }
-
-    public void Update()
+    private void OnEnable()
     {
-        if (restart)
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            }
-        }
+        EventManager.Instance.StartButtonPressed += OnStartButtonPressed;
+        EventManager.Instance.RestartButtonPressed += OnRestartButtonPressed;
     }
 
-    public void GameOver() {
-        gameOverText.text = "Game Over!";
-        restartText.text = "Press 'R' for Restart";
-        gameOver = true;
-        restart = true;
+    private void OnDisable()
+    {
+        EventManager.Instance.StartButtonPressed -= OnStartButtonPressed;
+        EventManager.Instance.RestartButtonPressed -= OnRestartButtonPressed;
+    }
+
+    #endregion //Unity Methods
+
+    #region Public Methods
+
+    public void GameOver()
+    {
         EventManager.Instance.GameOver.Invoke();
     }
+
+    #endregion //Public Methods
+
+    #region Private Methods
+
+    private void InitGame()
+    {
+        GetComponent<LevelController>().Init();
+        EventManager.Instance.GameStarted.Invoke();
+    }
+
+    private void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    #region Event Handlers
+
+    private void OnStartButtonPressed()
+    {
+        InitGame();
+    }
+
+    private void OnRestartButtonPressed()
+    {
+        RestartGame();
+    }
+
+    #endregion //Event Handlers
+
+    #endregion //Private Methods
 }
