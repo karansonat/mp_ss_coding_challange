@@ -53,8 +53,7 @@ public class LevelController : MonoBehaviour
     public void Init()
     {
         _stateController = new StateController();
-        //_stateController.Init(new WaveState(_defaultWaveFactory, _defaultRoundRepeat));
-        _stateController.Init(new BossState(SpawnBoss()));
+        _stateController.Init(new WaveState(_defaultWaveFactory, _defaultRoundRepeat));
         _lastWaveType = WaveType.Default;
     }
 

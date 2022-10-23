@@ -6,6 +6,7 @@ public class BossState : IState
 
     private StateController _stateController;
     private BossController _boss;
+    private bool _isBossKilled;
 
     #endregion //Fields
 
@@ -14,6 +15,7 @@ public class BossState : IState
     public BossState(BossController boss)
     {
         _boss = boss;
+        _isBossKilled = false;
     }
 
     #endregion //Constructor
@@ -34,7 +36,9 @@ public class BossState : IState
 
     IState IState.Update()
     {
-        _stateController.Update();
+        if (!_isBossKilled)
+            _stateController.Update();
+
         return this;
     }
 
@@ -44,6 +48,8 @@ public class BossState : IState
 
     private void OnBossKilled()
     {
+        _isBossKilled = true;
+        _stateController.Kill();
         Debug.Log("Level Complete");
     }
 
